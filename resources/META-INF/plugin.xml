@@ -1,36 +1,53 @@
 <idea-plugin>
     <id>com.yk.company.table.md.id</id>
     <name>TableToDocument</name>
-    <version>1.0</version>
-    <vendor email="24456865@qq.com" url="">yao kai</vendor>
+    <version>1.2</version>
+    <vendor email="24456865@qq.com" url="https://github.com/nothingimposible/TableToDocument">yao kai</vendor>
 
     <description><![CDATA[
-      <ul>
-          <li>插件功能:1.通过数据库表导出数据库设计文档 2.通过约定格式的数据库设计文档生成数据库建表语句 </li>
+     <b> Plug-in features </b>
+       <ul>
+       <li>1. Export database design document from database table </li>
+       <li> 2. Generate database construction sentences from the database design document in the agreed format.</li>
+       </ul>
+       <b> Usage </b>
+       <ul>
+       <li>step1. Connect to the database using the database connection tool </li>
+       <li>step2. Select one or more database tables, right-click "Table To Document", enter the operation panel </li>
+       </ul>
+     <b> Interface Introduction </b>
+       <ul>
+       <li>table to document</li>
+       <p style = "margin:5px">The Copy button copies the database table design document for the Markdown syntax</p>
+       <p style = "margin:5px">The Select an Export Directory button selects the address of the exported document </p>
+       <p style = "margin:5px">Markdown and HTML export formats are now supported </p>
+       <p style = "margin:5px">After the export address is selected, the export button is used to export the file. The file name is the first table name of all the exported database tables</p>
+       <li>document to table</li>
+       <p style = "margin:5px">Output the database table design document in Markdown format. Click the GET SQL button to get the table construction sentence</p>
+       <p style = "margin:5px">The supported header content is at the bottom of the screen </p>
+       </ul>
+
+    <br/>
+    <b>插件功能</b>
+    <ul>
+          <li>1.通过数据库表导出数据库设计文档  </li>
+          <li>2.通过约定格式的数据库设计文档生成数据库建表语句</li>
+    </ul>
+    <b>使用方式</b>
+    <ul>
           <li>step1.通过database数据库连接工具连接数据库</li>
           <li>step2.选择一张或多张数据库表，右键选择"Table To Document"，进入操作面板</li>
-          <li>(1)界面"table to document"介绍</li>
-          <li>copy 按钮可以复制markdown语法的数据库表设计文档</li>
-          <li>Select an Export Directory 按钮选择导出文档地址</li>
-          <li>现在支持markdown和html两种格式导出</li>
-          <li>选择导出地址后，export按钮导出，文件名为导出的所有数据库表的第一个表名</li>
-          <li>(2)界面"document to table"</li>
-          <li>输出markdown格式的数据库表设计文档，点击 get sql 按钮获取建表语句</li>
-          <li>支持的表头内容在界面下方</li>
-      </ul>
-
-      <ul>
-         <li> Plug-in functions :1. Export the database design document from the database table. 2.
-              Step1 connect to the database using the database connection tool </li>
-         </li> step2. Select one or more database tables, right-click "Table To Document", enter the operation panel </li>
-         <li>(1) interface "Table to Document"
-         <li> Copy button copies database table design documents with markdown syntax </li>
-         <li>Select an Export Directory </li>
-         <li> now supports markdown and HTML export
-         <li> After the export address is selected, the export button exports the file named as the first table name of all the exported database tables </li>
-         <li>(2) interface "document to table" </li>
-         <li> Output the database table design document in Markdown format, click get SQL button to get the table construction sentence </li>
-         <li> Supports header content at the bottom of the screen </li>
+    </ul>
+    <b>界面介绍</b>
+    <ul>
+          <li>table to document</li>
+              <p style = "margin:5px">copy 按钮可以复制markdown语法的数据库表设计文档</p>
+              <p style = "margin:5px">Select an Export Directory 按钮选择导出文档地址</p>
+              <p style = "margin:5px">现在支持markdown和html两种格式导出</p>
+              <p style = "margin:5px">选择导出地址后，export按钮导出，文件名为导出的所有数据库表的第一个表名</p>
+          <li>document to table</li>
+              <p style = "margin:5px">输出markdown格式的数据库表设计文档，点击 get sql 按钮获取建表语句</p>
+              <p style = "margin:5px">支持的表头内容在界面下方</p>
       </ul>
     ]]></description>
 
@@ -38,14 +55,23 @@
       <ul>
         <li>v1.0<br/>
             Initial release of the plugin.<br/>
-            Provide mybatis Generate function according to configuration and default configuration in setting.
+        </li>
+
+        <li>v1.1<br/>
+            Additional notes.<br/>
+            Add the description in plugin.xml
+        </li>
+
+        <li>v1.2<br/>
+            Added table header resolution configuration.<br/>
+            Added new setting page to customize table header
         </li>
       </ul>
     ]]>
     </change-notes>
 
     <!-- 173.0 please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="143"/>
+    <idea-version since-build="183"/>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -55,13 +81,9 @@
         &lt;!&ndash; Add your extensions here &ndash;&gt;
       </extensions>-->
 
-    <depends optional="true">com.intellij.database</depends>
-    <extensions defaultExtensionNs="com.intellij">
-
-    </extensions>
+    <depends>com.intellij.database</depends>
 
     <actions>
-
         <action id="ShowMeuAction" class="cn.yk.action.ShowMeuAction" text="Table To Document" description="Table To Document">
             <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="shift meta H"/>

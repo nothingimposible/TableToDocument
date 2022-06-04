@@ -1,5 +1,6 @@
 package cn.yk.ui;
 
+import cn.yk.config.NameConfig;
 import cn.yk.constant.TableHeaderConstant;
 import cn.yk.util.FileUtil;
 import cn.yk.util.StringUtils;
@@ -14,14 +15,12 @@ import com.intellij.ui.ColoredSideBorder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.containers.JBIterable;
-import org.jsoup.internal.StringUtil;
 import sun.swing.table.DefaultTableCellHeaderRenderer;
 
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -29,7 +28,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -38,91 +36,119 @@ public class ShowUI extends JFrame {
 
     private Clipboard clipboard = getToolkit().getSystemClipboard();
 
+
     public static void main(String[] args) {
         new ShowUI();
     }
 
     public ShowUI() {
-        AnActionEvent anActionEvent = null;
-        StringBuilder mdContext = new StringBuilder();
-        PsiElement[] psiElements = anActionEvent.getData(LangDataKeys.PSI_ELEMENT_ARRAY);
-        Object[] tableHead = new Object[]{TableHeaderConstant.FIELD, TableHeaderConstant.TYPE, TableHeaderConstant.NOT_NULL,
-                TableHeaderConstant.INDEX, TableHeaderConstant.PRIMARY, TableHeaderConstant.DEFAULT_VALUE, TableHeaderConstant.DESCRIPTION};
-        ArrayList<Object> tableNameList = new ArrayList<>();
-        ArrayList<Object> tableDescribeList = new ArrayList<>();
-        ArrayList<Object[][]> fields = new ArrayList<>();
 
-        ArrayList<JTable> jTableArrayList = new ArrayList<>();
-        if (psiElements != null) {
-            for (PsiElement psiElement : psiElements) {
+        JPanel topPanelSetting = new JPanel();
 
-                StringBuilder oneTable = new StringBuilder();
-                DbTable dbTable = (DbTable) psiElement;
+        /* 布局部分我们这边不多做介绍
+         * 这边设置布局为 null
+         */
+        topPanelSetting.setLayout(null);
 
-                tableNameList.add(dbTable.getName());
-                tableDescribeList.add(dbTable.getComment() == null ? "" : dbTable.getComment());
+        // 创建 JLabel
+        JLabel fieldLabel = new JLabel("field:");
+        /* 这个方法定义了组件的位置。
+         * setBounds(x, y, width, height)
+         * x 和 y 指定左上角的新位置，由 width 和 height 指定新的大小。
+         */
+        fieldLabel.setBounds(10, 20, 80, 25);
+        topPanelSetting.add(fieldLabel);
 
-                String[][] field = getField(tableHead, dbTable);
-                fields.add(field);
+        /*
+         * 创建文本域用于用户输入
+         */
+        JTextField fieldText = new JTextField(20);
+        fieldText.setBounds(100, 20, 165, 25);
+        topPanelSetting.add(fieldText);
 
-                for (Object head : tableHead) {
-                    oneTable.append("|").append(head);
-                }
-                oneTable.append("|\n");
-                for (int i = 0; i < tableHead.length; i++) {
-                    oneTable.append("|").append("----");
-                }
-                oneTable.append("|\n");
+        // 输入数据类型的文本域
+        JLabel dataTypeLabel = new JLabel("dataType:");
+        dataTypeLabel.setBounds(10, 50, 80, 25);
+        topPanelSetting.add(dataTypeLabel);
 
-                for (int i = 0; i < field.length; i++) {
-                    for (int u = 0; u < field[0].length; u++) {
-                        oneTable.append("|").append(field[i][u] == null ? "" : field[i][u]);
-                    }
-                    oneTable.append("|\n");
-                }
-                //TODO
-                jTableArrayList.add(getJTable(field, tableHead));
-                String tableInfo = "table name:" + dbTable.getName() + "\n" + (dbTable.getComment() == null ? "" : dbTable.getComment());
-                mdContext.append("\n\n").append(tableInfo).append("\n").append(oneTable);
-            }
-        }
+        /*
+         *这个类似用于输入的文本域
+         * 但是输入的信息会以点号代替，用于包含密码的安全性
+         */
+        JTextField dataTypeText = new JTextField(20);
+        dataTypeText.setBounds(100, 50, 165, 25);
+        topPanelSetting.add(dataTypeText);
 
-        //---------------------------------------   内容分割线   ----------------------------------
+        // 输入不为空的文本域
+        JLabel notNullLabel = new JLabel("not null:");
+        notNullLabel.setBounds(10, 80, 80, 25);
+        topPanelSetting.add(notNullLabel);
 
-        JButton buttonCopy = new JButton("copy");
-        buttonCopy.setBounds(100, 0, 50, 30);
+        /*
+         *这个类似用于输入的文本域
+         * 但是输入的信息会以点号代替，用于包含密码的安全性
+         */
+        JTextField notNullText = new JTextField(20);
+        notNullText.setBounds(100, 80, 165, 25);
+        topPanelSetting.add(notNullText);
 
-        //文本域
-        JTextArea textArea = new JTextArea(40, 50);
-        textArea.setText(mdContext.toString());
+        // 输入不为空的文本域
+        JLabel indexLabel = new JLabel("index:");
+        indexLabel.setBounds(10, 110, 80, 25);
+        topPanelSetting.add(indexLabel);
 
+        /*
+         *这个类似用于输入的文本域
+         * 但是输入的信息会以点号代替，用于包含密码的安全性
+         */
+        JTextField indexText = new JTextField(20);
+        indexText.setBounds(100, 110, 165, 25);
+        topPanelSetting.add(indexText);
 
-        //Scroll面板
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        // 输入不为空的文本域
+        JLabel primaryLabel = new JLabel("primary:");
+        primaryLabel.setBounds(10, 140, 80, 25);
+        topPanelSetting.add(primaryLabel);
 
-        JPanel panel = new JPanel();
-        for (JTable table : jTableArrayList) {
-            panel.add(table);
-        }
-        JScrollPane scrollPane2 = new JScrollPane(panel);
+        /*
+         *这个类似用于输入的文本域
+         * 但是输入的信息会以点号代替，用于包含密码的安全性
+         */
+        JTextField primaryText = new JTextField(20);
+        primaryText.setBounds(100, 140, 165, 25);
+        topPanelSetting.add(primaryText);
 
-        scrollPane.setBounds(0, 50, 200, 300);
-        JPanel topPanel = new JPanel();
+        // 输入不为空的文本域
+        JLabel defaultValueLabel = new JLabel("defaultValue:");
+        defaultValueLabel.setBounds(10, 170, 100, 25);
+        topPanelSetting.add(defaultValueLabel);
 
-        topPanel.add(buttonCopy);
-        topPanel.add(scrollPane2);
-        // 添加面板
-        add(topPanel);
+        /*
+         *这个类似用于输入的文本域
+         * 但是输入的信息会以点号代替，用于包含密码的安全性
+         */
+        JTextField defaultValueText = new JTextField(20);
+        defaultValueText.setBounds(100, 170, 165, 25);
+        topPanelSetting.add(defaultValueText);
 
+        // 输入不为空的文本域
+        JLabel descriptionLabel = new JLabel("description:");
+        descriptionLabel.setBounds(10, 200, 80, 25);
+        topPanelSetting.add(descriptionLabel);
 
-        buttonCopy.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //内容写到复制里
-                clipboard.setContents(new StringSelection(textArea.getText()), null);
-                Messages.showMessageDialog("copy success!", "Notice", Messages.getInformationIcon());
-            }
-        });
+        /*
+         *这个类似用于输入的文本域
+         * 但是输入的信息会以点号代替，用于包含密码的安全性
+         */
+        JTextField descriptionText = new JTextField(20);
+        descriptionText.setBounds(100, 200, 165, 25);
+        topPanelSetting.add(descriptionText);
+
+        // 创建登录按钮
+        JButton saveButton = new JButton("save");
+        saveButton.setBounds(350 / 2 - 40, 250 - 12, 80, 25);
+        topPanelSetting.add(saveButton);
+        add(topPanelSetting);
 
         setTitle("Table To Md");
         setSize(700, 1500);
@@ -136,7 +162,7 @@ public class ShowUI extends JFrame {
 
 
     private JTable getJTable(String[][] data, Object[] head) {
-     //   UIManager.put("Table.gridColor", new ColorUIResource(Color.gray));
+        //   UIManager.put("Table.gridColor", new ColorUIResource(Color.gray));
         DefaultTableCellRenderer trc = new DefaultTableCellRenderer();
         trc.setHorizontalAlignment(JLabel.CENTER);
         JTable jTable = new JTable(data, head);
@@ -168,37 +194,29 @@ public class ShowUI extends JFrame {
         for (int i = 0; i < dasColumns.size(); i++) {
             for (int u = 0; u < tableHead.length; u++)
                 field[i][u] = getValue(String.valueOf(tableHead[u]), dasColumns.get(i));
-           /* field[0][i] = dasColumns.get(i).getName();
-            field[1][i] = dasColumns.get(i).getDataType().typeName;
-            field[2][i] = dasColumns.get(i).isNotNull() ? "Y" : "";
-            field[3][i] = DasUtil.isIndexColumn(dasColumns.get(i)) ? "Y" : "";
-            field[4][i] = DasUtil.isPrimary(dasColumns.get(i)) ? "Y" : "";
-            field[5][i] = dasColumns.get(i).getDefault();
-            field[6][i] = dasColumns.get(i).getComment();*/
+
         }
         return field;
     }
 
     private String getValue(String headName, DasColumn dasColumn) {
-        switch (headName) {
-            case TableHeaderConstant
-                    .FIELD:
-                return dasColumn.getName();
-            case TableHeaderConstant.TYPE:
-                return String.valueOf(dasColumn.getDataType());
-            case TableHeaderConstant.NOT_NULL:
-                return dasColumn.isNotNull() ? "Y" : " ";
-            case TableHeaderConstant.INDEX:
-                return DasUtil.isIndexColumn(dasColumn) ? "Y" : " ";
-            case TableHeaderConstant.PRIMARY:
-                return DasUtil.isPrimary(dasColumn) ? "Y" : " ";
-            case TableHeaderConstant.DEFAULT_VALUE:
-                return dasColumn.getDefault();
-            case TableHeaderConstant.DESCRIPTION:
-                return dasColumn.getComment() == null ? " " : dasColumn.getComment();
-            default:
-                return " ";
-        }
+        if (Objects.equals(TableHeaderConstant.FIELD, headName))
+            return dasColumn.getName();
+        if (Objects.equals(headName, TableHeaderConstant.TYPE))
+            return String.valueOf(dasColumn.getDataType());
+        if (Objects.equals(headName, TableHeaderConstant.NOT_NULL))
+            return dasColumn.isNotNull() ? "Y" : " ";
+        if (Objects.equals(headName, TableHeaderConstant.INDEX))
+            return DasUtil.isIndexColumn(dasColumn) ? "Y" : " ";
+        if (Objects.equals(headName, TableHeaderConstant.PRIMARY))
+            return DasUtil.isPrimary(dasColumn) ? "Y" : " ";
+        if (Objects.equals(headName, TableHeaderConstant.DEFAULT_VALUE))
+            return dasColumn.getDefault();
+        if (Objects.equals(headName, TableHeaderConstant.DESCRIPTION))
+            return dasColumn.getComment() == null ? " " : dasColumn.getComment();
+
+        return " ";
+
     }
 
     public ShowUI(AnActionEvent anActionEvent) {
@@ -249,31 +267,13 @@ public class ShowUI extends JFrame {
         //---------------------------------------------------------------------//
 
         JBTabbedPane jTabbedpane = new JBTabbedPane();// 存放选项卡的组件
-        String[] tabNames = {"table to document", "document to sql"};
+        String[] tabNames = {"table to document", "document to sql", "setting"};
         JPanel topPanel = new JPanel();
-      //  topPanel.setBackground(Color.CYAN);
         topPanel.setLayout(new BorderLayout());
         //head 不显示
         Object[][] head = new Object[1][];
         head[0] = tableHead;
-        Object[][] data1 = new Object[][]{
-                {"表名", ComplexTable.mergeCellX, ComplexTable.mergeCellX},
-                {"描述：大三大四的", ComplexTable.mergeCellX, ComplexTable.mergeCellX},
-                {"列1", "列2", "列3"},
-                {"7", "8", "9"},
-                {"10dukhfaiudgfksjdgfkusygfyusdfvhu", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"}, {"10", "11", "12"}, {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"10", "11", "12"},
-                {"15", "16", "18"},
-        };
+
         final String[] exportFileName = {null};
 
         for (int i = 0; i < fields.size(); i++) {
@@ -335,7 +335,7 @@ public class ShowUI extends JFrame {
         JComboBox fileType = new JComboBox();
         fileType.addItem(".md");
         fileType.addItem(".html");
-     //   fileType.addItem(".docx");
+        //   fileType.addItem(".docx");
 
         fileType.addActionListener(new ActionListener() {
             @Override
@@ -349,7 +349,7 @@ public class ShowUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //导出文件
-                if (StringUtil.isBlank(exportFileName[0])) {
+                if (StringUtils.isBlank(exportFileName[0])) {
                     Messages.showMessageDialog("Select a path for exporting the file!", "Notice", Messages.getInformationIcon());
                 } else {
                     switch (String.valueOf(fileType.getSelectedItem())) {
@@ -360,7 +360,7 @@ public class ShowUI extends JFrame {
                             FileUtil.exportHtml(tableNameList, tableDescribeList, fields, tableHead, exportFileName[0] + "/" + tableNameList.get(0) + ".html");
                             break;
                         case ".docx":
-                     //       FileUtil.exportWord(tableNameList, tableDescribeList, fields, tableHead, exportFileName[0] + "/" + tableNameList.get(0) + ".docx");
+                            //       FileUtil.exportWord(tableNameList, tableDescribeList, fields, tableHead, exportFileName[0] + "/" + tableNameList.get(0) + ".docx");
                             break;
                         default:
                             Messages.showMessageDialog("The file type is not supported!", "Notice", Messages.getInformationIcon());
@@ -387,7 +387,6 @@ public class ShowUI extends JFrame {
         headJPanel.add(buttonCopy);
         //  headJPanel.add(comboxstatus);
 
-      //  headJPanel.setBackground(Color.green);
         topPanel.add(headJPanel, BorderLayout.NORTH);
 
         //文本域
@@ -397,25 +396,22 @@ public class ShowUI extends JFrame {
         //Scroll面板
         //  JScrollPane scrollPane = new JScrollPane(textArea);
 
-        JPanel panel = new JPanel();
-        panel.setSize(500, 700);
-        panel.setVisible(true);
+        JPanel topPanel3 = new JPanel();
+        topPanel3.setSize(500, 700);
+        topPanel3.setVisible(true);
         //   panel.setBounds(0,50,50,700);
-       // panel.setBackground(Color.gray);
-        panel.setLayout(new GridLayout(jTableArrayList.size(), 1, 50, 10));
+        // panel.setBackground(Color.gray);
+        topPanel3.setLayout(new GridLayout(jTableArrayList.size(), 1, 50, 10));
         for (JTable table : jTableArrayList) {
 
-           // table.setRowHeight(10);
+            // table.setRowHeight(10);
             //  JScrollPane scroll = new JScrollPane(table);
             Panel childPanel = new Panel();
-            // Label label = new Label("biaoming");
-            //  childPanel.add(label,BorderLayout.NORTH);
             childPanel.add(table, BorderLayout.CENTER);
-            //  scroll.setName("biaoming");
-            panel.add(table);
+            topPanel3.add(table);
         }
 
-        JScrollPane scrollPane2 = new JScrollPane(panel);
+        JScrollPane scrollPane2 = new JScrollPane(topPanel3);
 
         //  scrollPane.setBounds(0, 50, 200, 300);
         topPanel.add(scrollPane2, BorderLayout.CENTER);
@@ -429,9 +425,9 @@ public class ShowUI extends JFrame {
         JLabel tipsLabel = new JLabel("支持解析列名：字段、类型、非空、主键、默认值、描述");
 
         JButton toSqlButton = new JButton("get sql");
-        topPanel2.add(toSqlButton,BorderLayout.NORTH);
-        topPanel2.add(sqlJScroll,BorderLayout.CENTER);
-        topPanel2.add(tipsLabel,BorderLayout.SOUTH);
+        topPanel2.add(toSqlButton, BorderLayout.NORTH);
+        topPanel2.add(sqlJScroll, BorderLayout.CENTER);
+        topPanel2.add(tipsLabel, BorderLayout.SOUTH);
         toSqlButton.addActionListener(new ActionListener() {
 
             @Override
@@ -440,8 +436,8 @@ public class ShowUI extends JFrame {
                     if (sqlArea.getText() == null || "".equals(sqlArea.getText().trim())) {
                         Messages.showMessageDialog("Please enter the markdown statement!", "Notice", Messages.getInformationIcon());
                     } else {
-                        Set<String> yes = new HashSet<>(Arrays.asList(new String[]{"y","Y","yes","YES","是"}));
-                        Set<String> no = new HashSet<>(Arrays.asList(new String[]{"n","N","no","NO","不是","否"}));
+                        Set<String> yes = new HashSet<>(Arrays.asList(new String[]{"y", "Y", "yes", "YES", "是"}));
+                        Set<String> no = new HashSet<>(Arrays.asList(new String[]{"n", "N", "no", "NO", "不是", "否"}));
                         String data = sqlArea.getText();
 
                         StringBuilder sb = new StringBuilder("CREATE TABLE `" + "` (\n");
@@ -472,42 +468,51 @@ public class ShowUI extends JFrame {
                                 boolean primaryKey = false;
                                 for (int i = 0; i < columnPropertys.length; i++) {
 
-                                    switch (fieldMap.get(i).trim()) {
-                                        case TableHeaderConstant.FIELD:
-                                            if (columnPropertys[i].trim().length() > 0){
+                                        if(Objects.equals(fieldMap.get(i).trim(), TableHeaderConstant.FIELD)){
+                                            if (columnPropertys[i].trim().length() > 0) {
                                                 sb.append("`").append(columnPropertys[i].trim()).append("` ");
                                             }
-                                            break;
-                                        case TableHeaderConstant.TYPE:
-                                            if (columnPropertys[i].trim().length() > 0){
+                                            continue;
+                                        }
+
+
+                                        if(Objects.equals(fieldMap.get(i).trim(), TableHeaderConstant.TYPE)){
+                                            if (columnPropertys[i].trim().length() > 0) {
                                                 sb.append(columnPropertys[i].trim()).append(" ");
                                             }
+                                            continue;
+                                        }
 
-                                            break;
-                                        case TableHeaderConstant.NOT_NULL:
-                                            if (yes.contains(columnPropertys[i].trim())){
+                                        if(Objects.equals(fieldMap.get(i).trim(), TableHeaderConstant.NOT_NULL)){
+                                            if (yes.contains(columnPropertys[i].trim())) {
                                                 sb.append("NOT NULL ");
                                             }
-                                            break;
-                                        case TableHeaderConstant.PRIMARY:
-                                            if (yes.contains(columnPropertys[i].trim())){
+                                            continue;
+                                        }
+
+
+                                        if(Objects.equals(fieldMap.get(i).trim(), TableHeaderConstant.PRIMARY)){
+                                            if (yes.contains(columnPropertys[i].trim())) {
                                                 primaryKey = true;
                                             }
-                                            break;
-                                        case TableHeaderConstant.DEFAULT_VALUE:
-                                            if (columnPropertys[i].trim().length() > 0){
+                                            continue;
+                                        }
+
+                                        if(Objects.equals(fieldMap.get(i).trim(), TableHeaderConstant.DEFAULT_VALUE)){
+                                            if (columnPropertys[i].trim().length() > 0) {
                                                 sb.append("DEFAULT ").append(columnPropertys[i].trim()).append(" ");
                                             }
+                                            continue;
+                                        }
 
-                                            break;
-                                        case TableHeaderConstant.DESCRIPTION:
-                                            if (columnPropertys[i].trim().length() > 0){
+                                        if(Objects.equals(fieldMap.get(i).trim(), TableHeaderConstant.DESCRIPTION)){
+                                            if (columnPropertys[i].trim().length() > 0) {
                                                 sb.append("COMMENT '").append(columnPropertys[i].trim()).append("' ");
                                             }
-                                            break;
-                                        default:
-                                            break;
-                                    }
+                                            continue;
+                                        }
+
+
                                 }
                                 if (primaryKey) {
                                     sb.append("PRIMARY KEY ");
@@ -533,12 +538,110 @@ public class ShowUI extends JFrame {
             }
         });
 
+        JPanel topPanelSetting = new JPanel();
+
+        /* 布局部分我们这边不多做介绍
+         * 这边设置布局为 null
+         */
+        topPanelSetting.setLayout(null);
+
+        // 创建 JLabel
+        JLabel fieldLabel = new JLabel("field:");
+        fieldLabel.setBounds(10, 20, 80, 25);
+        topPanelSetting.add(fieldLabel);
+
+        JTextField fieldText = new JTextField(20);
+        fieldText.setBounds(100, 20, 165, 25);
+        fieldText.setText(TableHeaderConstant.FIELD);
+        topPanelSetting.add(fieldText);
+
+        JLabel dataTypeLabel = new JLabel("dataType:");
+        dataTypeLabel.setBounds(10, 50, 80, 25);
+        topPanelSetting.add(dataTypeLabel);
+
+        JTextField dataTypeText = new JTextField(20);
+        dataTypeText.setBounds(100, 50, 165, 25);
+        dataTypeText.setText(TableHeaderConstant.TYPE);
+        topPanelSetting.add(dataTypeText);
+
+        JLabel notNullLabel = new JLabel("not null:");
+        notNullLabel.setBounds(10, 80, 80, 25);
+        topPanelSetting.add(notNullLabel);
+
+        JTextField notNullText = new JTextField(20);
+        notNullText.setBounds(100, 80, 165, 25);
+        notNullText.setText(TableHeaderConstant.NOT_NULL);
+        topPanelSetting.add(notNullText);
+
+        JLabel indexLabel = new JLabel("index:");
+        indexLabel.setBounds(10, 110, 80, 25);
+        topPanelSetting.add(indexLabel);
+
+        JTextField indexText = new JTextField(20);
+        indexText.setBounds(100, 110, 165, 25);
+        indexText.setText(TableHeaderConstant.INDEX);
+        topPanelSetting.add(indexText);
+
+        JLabel primaryLabel = new JLabel("primary:");
+        primaryLabel.setBounds(10, 140, 80, 25);
+        topPanelSetting.add(primaryLabel);
+
+        JTextField primaryText = new JTextField(20);
+        primaryText.setBounds(100, 140, 165, 25);
+        primaryText.setText(TableHeaderConstant.PRIMARY);
+        topPanelSetting.add(primaryText);
+
+        JLabel defaultValueLabel = new JLabel("defaultValue:");
+        defaultValueLabel.setBounds(10, 170, 100, 25);
+        topPanelSetting.add(defaultValueLabel);
+
+        JTextField defaultValueText = new JTextField(20);
+        defaultValueText.setBounds(100, 170, 165, 25);
+        defaultValueText.setText(TableHeaderConstant.DEFAULT_VALUE);
+        topPanelSetting.add(defaultValueText);
+
+        JLabel descriptionLabel = new JLabel("description:");
+        descriptionLabel.setBounds(10, 200, 80, 25);
+        topPanelSetting.add(descriptionLabel);
+
+        JTextField descriptionText = new JTextField(20);
+        descriptionText.setBounds(100, 200, 165, 25);
+        descriptionText.setText(TableHeaderConstant.DESCRIPTION);
+        topPanelSetting.add(descriptionText);
+
+        JButton saveButton = new JButton("save");
+        saveButton.setBounds(350 / 2 - 40, 250 - 12, 80, 25);
+        topPanelSetting.add(saveButton);
+
+        ActionListener saveListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NameConfig config = new NameConfig();
+                config.setField(fieldText.getText());
+                config.setDataType(dataTypeText.getText());
+                config.setPrimary(primaryText.getText());
+                config.setIsNotNull(notNullText.getText());
+                config.setIsIndex(indexText.getText());
+                config.setDefaultValue(defaultValueText.getText());
+                config.setDescription(descriptionText.getText());
+                FileUtil.saveNameConfig(config);
+                TableHeaderConstant.update(config);
+                Messages.showMessageDialog("Save success!", "Notice", Messages.getInformationIcon());
+            }
+        };
+
+        saveButton.addActionListener(saveListener);
+
+        /*----------------------------------------------------------------------------*/
 
         jTabbedpane.addTab(tabNames[0], null, topPanel, "Tab1");// 加入第一个页面
         jTabbedpane.setMnemonicAt(0, KeyEvent.VK_0);// 设置第一个位置的快捷键为0
 
         jTabbedpane.addTab(tabNames[1], null, topPanel2, "Tab2");// 加入第一个页面
         jTabbedpane.setMnemonicAt(1, KeyEvent.VK_1);// 设置第一个位置的快捷键为0
+
+        jTabbedpane.addTab(tabNames[2], null, topPanelSetting, "Tab3");// 加入第一个页面
+        jTabbedpane.setMnemonicAt(2, KeyEvent.VK_2);// 设置第一个位置的快捷键为0
         add(jTabbedpane);
         // 添加面板
         // add(topPanel, BorderLayout.CENTER);

@@ -1,11 +1,15 @@
 package cn.yk.util;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import cn.yk.config.NameConfig;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class FileUtil {
 
@@ -179,5 +183,107 @@ public class FileUtil {
 
     private static String getTd(String str) {
         return "<td>" + str + "</td>\n";
+    }
+
+    public static NameConfig getNameConfig() {
+        String filePath = "config.txt";
+/*        try {
+            filePath = FileUtil.class.getClassLoader().getResource("config.txt").toURI().getPath();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }*/
+        File file = new File(filePath);
+        if (!file.exists()){
+            return new NameConfig();
+        }
+
+        StringBuilder builder = new StringBuilder();
+
+        FileReader fileReader = null;
+
+        try {
+            fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String s;
+            while ((s = bufferedReader.readLine()) != null){
+                builder.append(s);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (fileReader!=null){
+                try {
+                    fileReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        Map<String,String> parse = null;
+        try {
+            parse = (Map<String, String>) new JSONParser().parse(builder.toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        NameConfig nameConfig = new NameConfig();
+        try {
+            nameConfig = new NameConfig(parse);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return nameConfig;
+    }
+
+    public static void saveNameConfig(NameConfig config){
+        String jsonString = "";
+        try {
+             jsonString = new JSONObject(config.toMap()).toJSONString();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        String filePath = "config.txt";
+      /*  try {
+            filePath = FileUtil.class.getClassLoader().getResource("config.txt").toURI().getPath();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }*/
+        File file = new File(filePath);
+        if (!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        FileWriter fileWriter = null;
+        BufferedWriter writer = null;
+        try {
+            fileWriter =  new FileWriter(file);
+            writer = new BufferedWriter(fileWriter);
+            writer.append(jsonString);
+            writer.flush();
+            fileWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (writer != null){
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fileWriter != null){
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 }
