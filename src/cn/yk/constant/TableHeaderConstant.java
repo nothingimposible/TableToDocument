@@ -26,5 +26,17 @@ public final class TableHeaderConstant {
         DESCRIPTION = config.getDescription();
     }
 
+    public static void update() {
+        NameConfig config = FileUtil.getNameConfig();
+        FIELD = config.getField() == null ? "字段" : config.getField();
+        TYPE = config.getDataType() == null ? "类型" : config.getDataType();
+        NOT_NULL = config.getIsNotNull() == null ? "非空" : config.getIsNotNull();
+        INDEX = config.getIsIndex() == null ? "索引" : config.getIsIndex();
+        PRIMARY = config.getPrimary() == null ? "主键" : config.getPrimary();
+        DEFAULT_VALUE = config.getDefaultValue() == null ? "默认值" : config.getDefaultValue();
+        DESCRIPTION = config.getDescription() == null ? "说明" : config.getDescription();
+
+    }
+
 
 }

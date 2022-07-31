@@ -102,6 +102,23 @@ public class NameConfig {
         }
     }
 
+    public NameConfig(String configString){
+        Map<String,String> map = new HashMap<>();
+    }
+
+    public String toConfigString() throws IllegalAccessException {
+        Class clazz = NameConfig.class;
+        StringBuilder result = new StringBuilder();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field:fields){
+            if (field.get(this)!=null){
+                result.append(field.getName()).append(":").append(field.get(this)).append("\n");
+            }
+        }
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
+
     public Map<String,String> toMap() throws IllegalAccessException {
         Map<String, String> map = new HashMap<>();
         Class clazz = NameConfig.class;

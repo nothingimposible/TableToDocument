@@ -1,17 +1,17 @@
 package cn.yk.util;
 
 import cn.yk.config.NameConfig;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.intellij.ide.util.PropertiesComponent;
 
 import java.io.*;
-import java.net.URISyntaxException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 
 public class FileUtil {
+
+    private static final String keyPrefix = "com.yk.company.table.md.id.";
 
   /*  public static void exportWord(ArrayList<Object> tableNameList, ArrayList<Object> tableDescribeList, ArrayList<Object[][]> fields, Object[] header, String fileName) {
         //创建Word文档
@@ -186,104 +186,34 @@ public class FileUtil {
     }
 
     public static NameConfig getNameConfig() {
-        String filePath = "config.txt";
-/*        try {
-            filePath = FileUtil.class.getClassLoader().getResource("config.txt").toURI().getPath();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }*/
-        File file = new File(filePath);
-        if (!file.exists()){
-            return new NameConfig();
-        }
 
-        StringBuilder builder = new StringBuilder();
-
-        FileReader fileReader = null;
-
-        try {
-            fileReader = new FileReader(file);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String s;
-            while ((s = bufferedReader.readLine()) != null){
-                builder.append(s);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            if (fileReader!=null){
-                try {
-                    fileReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        Map<String,String> parse = null;
-        try {
-            parse = (Map<String, String>) new JSONParser().parse(builder.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        PropertiesComponent instance = PropertiesComponent.getInstance();
         NameConfig nameConfig = new NameConfig();
-        try {
-            nameConfig = new NameConfig(parse);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        Field[] fields = NameConfig.class.getDeclaredFields();
+        for (Field field:fields){
+            field.setAccessible(true);
+            try {
+                field.set(nameConfig, instance.getValue(keyPrefix+field.getName()));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
+
 
         return nameConfig;
     }
 
     public static void saveNameConfig(NameConfig config){
-        String jsonString = "";
+        PropertiesComponent instance = PropertiesComponent.getInstance();
+
         try {
-             jsonString = new JSONObject(config.toMap()).toJSONString();
+            for (Map.Entry<String,String> entry:config.toMap().entrySet()){
+                instance.setValue(keyPrefix+entry.getKey(),entry.getValue());
+            }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        String filePath = "config.txt";
-      /*  try {
-            filePath = FileUtil.class.getClassLoader().getResource("config.txt").toURI().getPath();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }*/
-        File file = new File(filePath);
-        if (!file.exists()){
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
-        FileWriter fileWriter = null;
-        BufferedWriter writer = null;
-        try {
-            fileWriter =  new FileWriter(file);
-            writer = new BufferedWriter(fileWriter);
-            writer.append(jsonString);
-            writer.flush();
-            fileWriter.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            if (writer != null){
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (fileWriter != null){
-                try {
-                    fileWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
 
     }
 }

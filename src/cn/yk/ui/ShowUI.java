@@ -15,13 +15,13 @@ import com.intellij.ui.ColoredSideBorder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.containers.JBIterable;
-import sun.swing.table.DefaultTableCellHeaderRenderer;
-
 import org.jetbrains.annotations.NotNull;
+import sun.swing.table.DefaultTableCellHeaderRenderer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -29,8 +29,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class ShowUI extends JFrame {
 
@@ -41,7 +41,13 @@ public class ShowUI extends JFrame {
         new ShowUI();
     }
 
+    public void init() {
+        TableHeaderConstant.update();
+    }
+
     public ShowUI() {
+
+        init();
 
         JPanel topPanelSetting = new JPanel();
 
@@ -213,14 +219,14 @@ public class ShowUI extends JFrame {
         if (Objects.equals(headName, TableHeaderConstant.DEFAULT_VALUE))
             return dasColumn.getDefault();
         if (Objects.equals(headName, TableHeaderConstant.DESCRIPTION))
-            return dasColumn.getComment() == null ? " " : dasColumn.getComment();
+            return dasColumn.getComment() == null ? " " : dasColumn.getComment().replace("\n"," ");
 
         return " ";
 
     }
 
     public ShowUI(AnActionEvent anActionEvent) {
-
+        init();
         StringBuilder mdContext = new StringBuilder();
         PsiElement[] psiElements = anActionEvent.getData(LangDataKeys.PSI_ELEMENT_ARRAY);
         Object[] tableHead = new Object[]{TableHeaderConstant.FIELD, TableHeaderConstant.TYPE, TableHeaderConstant.NOT_NULL,
@@ -625,8 +631,8 @@ public class ShowUI extends JFrame {
                 config.setDefaultValue(defaultValueText.getText());
                 config.setDescription(descriptionText.getText());
                 FileUtil.saveNameConfig(config);
-                TableHeaderConstant.update(config);
-                Messages.showMessageDialog("Save success!", "Notice", Messages.getInformationIcon());
+               // TableHeaderConstant.update(config);
+                Messages.showMessageDialog("Save success!\nRe-open the plugin configuration to take effect", "Notice", Messages.getInformationIcon());
             }
         };
 

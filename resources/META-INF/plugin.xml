@@ -1,13 +1,18 @@
 <idea-plugin>
     <id>com.yk.company.table.md.id</id>
     <name>TableToDocument</name>
-    <version>1.2</version>
+    <version>1.5</version>
     <vendor email="24456865@qq.com" url="https://github.com/nothingimposible/TableToDocument">yao kai</vendor>
 
+
     <description><![CDATA[
+     <p>Connect to the database through the Database tool, and then export the database table design document</p>
+     <p>通过database工具连接到数据库，然后导出数据库表设计文档</p>
+     <br/>
+     <br/>
      <b> Plug-in features </b>
        <ul>
-       <li>1. Export database design document from database table </li>
+       <li> 1. Export database design document from database table </li>
        <li> 2. Generate database construction sentences from the database design document in the agreed format.</li>
        </ul>
        <b> Usage </b>
@@ -25,6 +30,8 @@
        <li>document to table</li>
        <p style = "margin:5px">Output the database table design document in Markdown format. Click the GET SQL button to get the table construction sentence</p>
        <p style = "margin:5px">The supported header content is at the bottom of the screen </p>
+       <li>setting</li>
+       <p style = "margin:5px">Used to set the header field of the exported document, and the document header used to parse the document into a statement</p>
        </ul>
 
     <br/>
@@ -48,6 +55,8 @@
           <li>document to table</li>
               <p style = "margin:5px">输出markdown格式的数据库表设计文档，点击 get sql 按钮获取建表语句</p>
               <p style = "margin:5px">支持的表头内容在界面下方</p>
+          <li>setting</li>
+              <p style = "margin:5px">用来设置导出文档的表头字段，解析文档成建表语句时的文档表头也用设置的内容</p>
       </ul>
     ]]></description>
 
@@ -66,12 +75,22 @@
             Added table header resolution configuration.<br/>
             Added new setting page to customize table header
         </li>
+
+        <li>v1.3<br/>
+            Resolve version incompatibilities.<br/>
+        </li>
+        <li>v1.4<br/>
+            ..
+        </li>
+        <li>v1.5<br/>
+            Introduction in Chinese has been added
+        </li>
       </ul>
     ]]>
     </change-notes>
 
     <!-- 173.0 please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="183"/>
+    <idea-version since-build="181"/>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -81,6 +100,9 @@
         &lt;!&ndash; Add your extensions here &ndash;&gt;
       </extensions>-->
 
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.database</depends>
 
     <actions>
